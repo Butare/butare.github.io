@@ -551,12 +551,74 @@ e.g: http://192.168.49.2:30000
 - list namespaces: `$ kubens`  (the active one will be highlighted)
 - to change active namespace: `$ kubens [namespace-name]`
 
-- After changing the active namespace, you can list the components without assignig the namespace in the command.
+- After changing the active namespace -- long command.
 	- Before changing active namespace: `$ kubectl get configmap -n db-namespace` 
-	- After changing active namespace: `$ kubectl get configmap`
+	- After changing active namespace -- short command: `$ kubectl get configmap`
 
 
 # K8s Ingress Explained
+
+## What is Ingress?
+
+### External Service vs. Ingress
+
+#### External Service:
+- One & simplest way to access the application from ouside the K8s cluster is to use `External Service`
+- External service uses IP address & Pod's Port number to access the application. Though, it's OK for testing/development purposes it's NOT recommended in production.
+####  Ingress:
+- Access the application from outside the K8s cluster
+- Ingress helps to access the application by using the Domain names not the IP address & Port number
+
+  ```yaml
+   Browser <--> ingress  <--> internal-service <--> pod
+  ```
+
+## Ingress YAML Configuration
+
+E.g:
+  ```yaml
+  apiVersion: networking.k8s.io/v1
+  kind: Ingress  # kind is Ingress
+  metadata:
+    name: myapp-ingress
+    labels:
+      name: myingress
+  spec:
+    rules: # routing rules
+    - host: myapp.com
+      http:
+        paths:
+        - pathType: Prefix
+          path: "/"
+          backend:
+            service:
+              name: myapp-internal-service # service name
+              port: 
+                number: 8080
+
+  ```
+- `Ingress.spec.rules`: Are routing rules, that forward requests to the internal service.
+- From the example above; user will write: http://myapp.com/
+ - Notice that we're using `http` not `https`, http is default, https has to be configured.
+
+- `Ingress.spec.rules.http`: is not related to `http:` in the browser. It is for forwarding incoming request to the internal service
+- `Ingress.spec.rules.host`;
+	- should be a valid domain address
+	- should map domain name to Node's IP address, which is the entry point of the node or any K8s cluster
+
+### Ingress vs. External Service (.yaml)
+
+|   | Ingress | External service |
+|---|-----    |---- 			 |
+|has nodePort/targetPort? | No | Yes|
+|Default Type | LoadBalancer | Default |
+|Kind | Ingress | Service|
+
+
+
+## When do you need Ingress
+
+## Ingress Controller
 
 
  
@@ -564,4 +626,4 @@ e.g: http://192.168.49.2:30000
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 
 	- e.g: `$ echo -n 'mongo123' | base64` //output bW9uZ28xMjM=
-    
+       

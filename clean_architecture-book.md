@@ -602,7 +602,7 @@ As previously stated, a good software architecture must support:
 - `Service Level`: We can reduce the dependencies down to the level of data structures, and communicate solely through network packets such that every execution unit is entirely independent of source and binary changes to others (e.g; services or micro-services) 
 
 What's the best mode?
-- The answer is that it's hard to know which mode is the best during the early stage of a project. Indeed, as the project matures, the optimal mode may change
+- The answer is that it's hard to know which mode is the best during the early stage of a project. Indeed, as the proffffFject matures, the optimal mode may change
 - One solution (which seems to be popular at the moment) is to simply decouple at the service level by default. 
 	- A problem with this approach is that it is expensive and encourages coarse-grained decoupling.
 	- An other problem with service-level decoupling is that it is expensive, both in development time and in system resources. Dealing with service boundaries where none are needed is a waste of effort, memory, and cycles. 
@@ -615,14 +615,17 @@ What's the best mode?
 
 
 # 17. BOUNDARIES: DRAWING LINES
-- Software architecture is the art of drawing line that also known as boundaries.
+- Software Architectue is the art of drawing lines (aka, boundaries)
+- Those boundaries separate software elements from one another, and restrict those on one side from knowing about those on the other.
+
 - Recall that the goal of an architect is to minimize the human resources required to build and maintain the required system.
-	- What is it that saps this kind of people-power?
-		- Coupling -- and especially coupling to premature decisions
-	- Which kind of decisions are premature?
-		- Decisions that have nothing to do with the business requirements -- the use cases -- of the system. These includes decisions about `frameworks`, `databases`, `web servers`, `utility libraries`, `dependency injection`, and the like.
-		- A good system architecture does not depend on those decisions.
-		- A good system architecture allows those decisions to be made at the latest possible moment, without significant impact.
+- What is it that saps this kind of people-power?
+	- `Coupling -- and especially coupling to premature decisions.`
+
+- Which kinds of decisions are premature?
+	- Decisions that have nothing to do with the business requirements -- the use cases -- of the system. e.g frameworks, databases, web servers, utility libraries, dependency injection,... 
+
+- A good system architecture allows those decisions to be made at the latest possible moment, without significant impact.
 
 
-## Which Lines do you draw, and when do you draw them?
+## WHICH Lines do you draw, and WHEN do you draw them?

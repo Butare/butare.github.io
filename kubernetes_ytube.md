@@ -604,7 +604,8 @@ E.g:
 - `Ingress.spec.rules.http`: is not related to `http:` in the browser. It is for forwarding incoming request to the internal service
 - `Ingress.spec.rules.host`;
 	- should be a valid domain address
-	- should map domain name to Node's IP address, which is the entry point of the node or any K8s cluster
+	- should map the Domain name to Node's IP address, which is the entrypoint to the K8s cluster.
+		- if K8s cluster has multiple nodes, one of them should have an IP address mapped to the domain name mentioned in Ingress host 
 
 ### Ingress vs. External Service (.yaml)
 
@@ -619,6 +620,42 @@ E.g:
 ## When do you need Ingress
 
 ## Ingress Controller
+
+### How to configure Ingress in your K8s cluster?
+- You need an implementation for Ingress
+- The implementation is called `Ingress Controller`,
+
+### What is Ingress Controller?
+-  It's a tool that 
+	-  evaluates all the ingress rules, and 
+	-  manages all the redirections
+	-  will be the entrypoint to cluster
+- K8s Nginx Ingress Controller tool is recommended.
+- Note that there are multiple Ingress controller third parties implementations, so choose carefully.
+
+### One thing to consider to set up the whole K8s cluster in order to receive external requests
+- Environment on which your cluster is running at.
+	- e.g; If you're using Cloud service provider such as AWS, GCP, Linode,... that have their out-of-box K8s solutions, Own virtualized Load Balancer.
+		- The setup would look like this: 
+	```
+    	Cloud Load Balacer (provided by Cloud service provider) --> Ingress Controller Pod --> ingress service --> app service --> application pod
+    ```
+    - Advantage of using Cloud load balancer,
+    	- You don't have to implement load balacer by yourself
+- In either cloud service or your bare metal service, you'll need
+	- separate server (proxy server, can be hardware or software solution)
+	- Public IP address and open ports, to be accessed from external
+	- Entrypoint to K8s cluster
+
+- `No server in K8s cluster is accessible from outside`
+
+```
+Browser --> Proxy server --> Ingress controller --> K8s cluster services  
+```
+
+### Ingress Controller in Minikube
+
+
 
 
  

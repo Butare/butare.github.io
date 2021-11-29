@@ -511,7 +511,7 @@ e.g: http://192.168.49.2:30000
  ## How Namespaces work and how to use it?
  > Before using a Namespace it should exist
  > 
-- check the namespaces: `$ kubectl get namespace`
+- check the namespaces: `$ kubectl get namespace` or `$ kubectl get ns`
 
    #### 1. Put a component into default namespace
 
@@ -643,7 +643,7 @@ E.g:
     - Advantage of using Cloud load balancer,
     	- You don't have to implement load balacer by yourself
 - In either cloud service or your bare metal service, you'll need
-	- separate server (proxy server, can be hardware or software solution)
+	- separate server (proxy server, can be hardware or software solution) that will take a role of Load Balancer
 	- Public IP address and open ports, to be accessed from external
 	- Entrypoint to K8s cluster
 
@@ -654,13 +654,123 @@ Browser --> Proxy server --> Ingress controller --> K8s cluster services
 ```
 
 ### Ingress Controller in Minikube
+- There are many ways to install Ingress controller. In this case we use Ingress controller in Minikube
+
+1. Installation: `$ minikube addons enable ingress`
+	- With just one command Ingress Controller is configured!
+	- This will automatically start the K8s Nginx implementation of Ingress Controller
+
+2. Check installed ingress controller: ` $ kubectl get pod -n kube-system`
+
+3. Create `Ingress rule` that will be evaluated by the Ingress controller
+
+	Preprequisite:
+   - check if both service & pod belong to the same namespace because the namespace is used in Ingress rule
+		` $ kubectl get all -n kubernetes-dashboard` (in this case, we use kubernetes-dashboard namespace) 
+        
+ 
+ 	```yaml
+ 	apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: dashboard-ingress
+      labels:
+        name: kubernetes-dashboard # both service & pod should belong to this namespace
+    spec:
+      rules:
+      - host: dashboard.com # you should manually configure the IP address this host name will resolve to
+        http:
+          paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: kubernetes-dashboard # service name
+                port: 
+                  number: 80 # service port
+ 	```
+ 
+ 	- Got this error? 
+ 		- ` Internal error occurred: failed calling webhook "validate.nginx.ingress.kubernetes.io"`
+
+			- Execute this command: 
+ 				`kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission`
+           
+4. Check installed ingress to the namespace: `$ kubectl get ingress -n kubernetes-dashboard`
+5. Check the default setting of Ingress: `$ kubectl describe ingress [ingress-name] -n [namespace]`
+	- e.g: `$ kubectl describe ingress dashboard-ingress -n kubernetes-dashboard`
 
 
 
+#### Configure Default Backend in Ingress
+- Create an internal service, then map it's name & port number to those of ingres default backend.
+
+
+#### Ingress Use cases
+
+1. Defining Multiple paths for same host
+- e.g: `http://myapp.com/analytics`, `http://myapp.com/shopping`, ... 
+
+ ```yaml
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: dashboard-ingress
+      labels:
+        name: kubernetes-dashboard # both service & pod should belong to this namespace
+    spec:
+      rules:
+      - host: myapp.com # you should manually configure the IP address this host name will resolve to
+        http:
+          paths:
+          - path: "/analytics"
+            backend:
+              service:
+                name: analytic-service # service name
+                port: 
+                  number: 3000 # service port
+          - path: "/shopping"
+            backend:
+              service:
+                name: shopping-service # service name
+                port: 
+                  number: 8080 # service port
+ ```
+ 
+ 2. Multiple sub-domains or domains
+ 	- Define multiple hosts in Ingress 
+	- Want to use `http://anaytics.myapp.com` instead of `http://myapp.com/analytics`. 
+ ```yaml
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: dashboard-ingress
+      labels:
+        name: kubernetes-dashboard # both service & pod should belong to this namespace
+    spec:
+      rules:
+      - host: http://anaytics.myapp.com
+        http:
+          paths:
+          - path:
+            backend:
+              service:
+                name: analytic-service # service name
+                port: 
+                  number: 3000 # service port
+      - host: http://shopping.myapp.com
+        http:
+          paths:
+          - path:
+            backend:
+              service:
+                name: shopping-service # service name
+                port: 
+                  number: 8080 # service port
+ ```
 
  
  
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 
 	- e.g: `$ echo -n 'mongo123' | base64` //output bW9uZ28xMjM=
-       

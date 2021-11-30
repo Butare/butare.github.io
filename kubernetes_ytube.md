@@ -769,8 +769,60 @@ Browser --> Proxy server --> Ingress controller --> K8s cluster services
                   number: 8080 # service port
  ```
 
+3. Configuring TLS certificates -- https//
+
+- It's pretty simple to configure HTTPS forwarding in Ingress.
+	- Just add `tls` and and `hosts.secretName` attributes in Ingress configuration.
+
+```yaml
+ apiVersion: networking.k8s.io/v1
+   kind: Ingress
+   metadata:
+     name: tls-example-ingress
+   spec:
+     tls:
+     - hosts: 
+       - myapp.com
+       secretName: myapp-secret-tls #Secret kind you have to create in a cluster that holds TLS certificates
+     rules:
+     - host: myapp.com
+       http:
+         paths:
+         - path:
+           backend:
+             service:
+               name: myapp-internal-service # service name
+               port: 
+                 number: 8080 # service port
+
+```
+
+```yaml
+apiVersion: v1
+kind: Secret 
+metadata:
+  name: myapp-secret-tls # a random name
+  namespace: default
+type: Opaque # default for arbitrary key-value pairs
+data: # actual contents
+  tls.crt: base64 encoded cert
+  tls.key: base64 encoded key 
+```
+Note:
+
+  - Note that TLS certificate & key names should be `tls.crt` & `tls.key` respectively.
+  - Values are file contents NOT file paths/locations
+  - Secret component must be in the same namespace as the Ingress component.
  
+ 
+ # Helm - Package Manager of K8s
+ 
+ ## What's Helm?
+ ## What are Helm Charts?
+ ## How to use Helm?
+ ## When to use Helm?
  
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 
 	- e.g: `$ echo -n 'mongo123' | base64` //output bW9uZ28xMjM=
+        

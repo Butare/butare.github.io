@@ -629,3 +629,24 @@ What's the best mode?
 
 
 ## WHICH Lines do you draw, and WHEN do you draw them?
+- You draw lines between things that matter and things that don't.
+- The GUI doesn't matter to the business rules, so there should be a line between them.
+- The database doesn't matter to the GUI, so there should be a line between them
+- The database doesn't matter to the business rules, so there should be a line between them.
+
+Some may believe that DB is inextricably connected to the business rules but that's not correct.
+- Business rules don't need to know about the schema, or the query language, or any of the other details about the database.
+- All the business need to know is that there's a set of functions that can be used to fetch or save data. This allows use to put the DB behind the interface.
+
+```
+Business rules -- uses --> Database Interface<I> <|----- Implements-- Database access --- uses --> Database
+```
+- `Business rules` uses `Database Interface`
+- `Databse Access` implements `Database Interface`
+- `Database Access` uses `Database`
+
+In real application, there would be many business rule classes, many database interface classes, and many database access implementations
+
+From the above design where is the boundary line?
+- The boundary line is drawn across the inheritance relationship, just below the `Database Interface`
+- Notice the two arrows leaving the Database Access class. Those two arrows point away from the DatabaseAccess class. Means, that none of these classes knows that the Database Access class exists.

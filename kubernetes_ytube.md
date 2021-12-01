@@ -818,9 +818,23 @@ Note:
  # Helm - Package Manager of K8s
  
  ## What's Helm?
- ## What are Helm Charts?
+ - Package manager for Kubernetes (like homebrew (mac)).
+To package YAML files and distribute them in public and private repositories
+ - In a real application we need multiple K8s components to work together (such as service, deployment, secret, configMap, ...). Therefore it can be difficult to manage these configuration (YAML) files manually. So, it's needed to bundle all related YAML files together to easily distribute & share with other members. A bundle of YAML files is called `Helm Chart`
+ - Usually you can;
+ 	- Create your own Helm charts with Helm and Push them to Helm repository to make it available for others, or
+ 	- You can download and use existing Helm charts
+
+- Helm charts that are commonly used such as Database Apps (e.g; MongoDB), Minitoring Apps (e.g; Promotheus), & etc. are already available in Helm repository
+	- Can be obtained just by installing Helm 
+
+- To check if a particular Helm Chart is available;
+	- Command: `$ helm search <keyword>` 
+	- or Search on Helm Hub
  ## How to use Helm?
  ## When to use Helm?
+ ## What is Tiller?
+ 
  
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 

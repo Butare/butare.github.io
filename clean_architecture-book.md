@@ -650,3 +650,36 @@ In real application, there would be many business rule classes, many database in
 From the above design where is the boundary line?
 - The boundary line is drawn across the inheritance relationship, just below the `Database Interface`
 - Notice the two arrows leaving the Database Access class. Those two arrows point away from the DatabaseAccess class. Means, that none of these classes knows that the Database Access class exists.
+
+At component level, 
+- A component that contains many business rules
+- The component that contains the DB and all its access classes
+```yaml
+Business rules <---- uses --- Database
+```
+- Note the direction of the arrow. The `Database` knows about the `Business Rules`. The `Business Rules` don't know about the `Database`
+- The direction of line shows that the `Database` doesn't matter to the `Business Rules`, but the `Database` cannot exist without the `Business Rules`.
+- If that seems strange, just remember this point:
+
+	- The `Database` component contains the code that translates the calls made by the `Business Rules` into the query language of the database. It is that tranlation code that knows about the `Business Rules`
+
+- The Database component could be replaced with many different implementations -- the `Business rules` don't care.
+
+## WHAT ABOUT INPUT AND OUTPUT?
+- Developers & Customers often get confused about what the system is. 
+	- They see GUI, and think that the GUI is the system.
+	- The define a system in terms of the GUI, so they believe that they should see the GUI start working immediately.
+	- The fail to realize a critically important principle: `The IO is irrelevant`
+
+- The GUI doesn't matter to the model -- the business rules
+- The `GUI` and `Business Rules` are separated by a boundary line
+
+```yaml
+Business Rules <--- uses ---- GUI
+```
+- We can see that `GUI` cares about the `Business Rules`
+- But the `Business Rules` don't care about any kind of `GUI`
+
+
+## PLUGIN ARCHITECTURE
+

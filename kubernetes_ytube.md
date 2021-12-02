@@ -828,15 +828,69 @@ To package YAML files and distribute them in public and private repositories
 - Helm charts that are commonly used such as Database Apps (e.g; MongoDB), Minitoring Apps (e.g; Promotheus), & etc. are already available in Helm repository
 	- Can be obtained just by installing Helm 
 
+## How to use Helm?
 - To check if a particular Helm Chart is available;
 	- Command: `$ helm search <keyword>` 
-	- or Search on Helm Hub
- ## How to use Helm?
+	- or Search on Helm Hub (https://artifacthub.io/)
+
  ## When to use Helm?
+ 1. #### Sharing Helm Charts:
+ 	- Public registries for everyone
+	- Private registries for individuals or organizations who wish to share Charts 
+
+ 2. #### Templating Engine 
+	- If you have multiple Microservices to be deployed in K8s cluster, and those microservices differ only on few configs like application name, version, etc. you can use Helm to declared Template YAML config that retrives shared values from another YAML file called `values.yaml`
+
+- Template YAML Config:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+	name: {{ .Values.name }}
+spec:
+    containers:
+    - name: {{ .Values.container.name }}
+      image: {{ .Values.container.image }}
+      port: {{ .Values.container.port }}
+```
+- values.yaml:
+```yaml
+name: my-app
+container:
+    name: my-app-contianer
+    image: my-app-image
+    port: 9001
+```
+
+- Notice the `Values` in `{{.Values...}}` refers to the yaml file name, which will be like Object name created with instance fields
+
+- This is practical especially when you're doing CI/CD, because it will allows you to replace the values of K8s component dymamically.
+
+
+3. #### Sample Applications across different environments
+
+- If you want to deploy the same application in different enviroments (DEV, STG, PROD). you can publish your own Chart that contains shared configurations, then use it from different environments.
+
+## Helm Chart Structure
+- Directory Structure:
+
+```yaml
+mychart/  # Top level mychart forlder, which is name of chart
+  Chart.yaml # file contains meta info about chart. e.g: name, version, dependencies...
+  values.yaml # file contains values for  the template files
+  charts/ # folder contains other charts that this chart depends on.
+  templates/  # folder where actual template files are stored
+  ...
+```
+Optionally, you can have other files like Readme or lisence files in this folder
+- The directory above will be created when you run `$ heml install <chart-name>`
+
+
+
  ## What is Tiller?
  
  
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 
 	- e.g: `$ echo -n 'mongo123' | base64` //output bW9uZ28xMjM=
-        
+       

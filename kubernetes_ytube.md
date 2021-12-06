@@ -941,7 +941,7 @@ values.yaml containts Default values
 
 ### 2. Store files that will be used by K8s components
 - You can use Persistent Volume
-- Persiste Volume requirements:
+- Persistent Volume requirements:
 	- It's like any other cluster resource
 	- Its created via YAML file 
 
@@ -981,4 +981,4 @@ values.yaml containts Default values
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 
 	- e.g: `$ echo -n 'mongo123' | base64` //output bW9uZ28xMjM=
-       
+        

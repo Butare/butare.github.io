@@ -883,13 +883,101 @@ mychart/  # Top level mychart forlder, which is name of chart
   ...
 ```
 Optionally, you can have other files like Readme or lisence files in this folder
-- The directory above will be created when you run `$ heml install <chart-name>`
 
+- When you execute: `$ heml install <chart-name>`
+	- The Template files will be filled with values from `values.yaml`
 
+### Values Injection into template files
+- Assume that
+values.yaml containts Default values
+  ```yaml
+  imageName: myapp
+  port: 8080
+  version: 1.0.0
+  ```
+- The default values in values.yaml can be overriden, by doing either of this:
+1. Specify the config file name to get the values from a custom config file (Recommended):
+	- `helm install --values=my-values.yaml <chartname>`
+
+	my-values.yaml to override default values
+    ```yaml
+    version: 2.0.0
+    ```
+  
+  	- Only the version will be overriden (`2.0.0` will override `1.0.0`)
+
+  	- the result of `.Values` object will be:
+    ```yaml
+    imageName: myapp
+    port: 8080
+    version: 2.0.0 # version value from custom values file (my-values.yaml)
+    ```
+2. Override default value using command line:
+	- `helm install --set version=2.0.0`
 
  ## What is Tiller?
+ - Was used on Helm 2.0 but is nolonger exists from the Helm 3.0
  
  
+# K8s Volumes Explained
+
+- How to `persist data` in K8s using volumes
+	- Persistent Volume
+	- Persistent Volume Claim
+	- Storage Class 
+
+- You have to configure the volume to persist data manually. Otherwise data will lost when you stop a Pod
+
+## Use case
+
+### 1. Store DB data
+
+- You need a DB `Storage`
+
+	- Storage requirements:
+      1. You need a Storage that doesn't depend on the Pod lifecyle
+      2. Storage must be available on all nodes. 
+      3. Storage needs to survive even if cluster crashes
+
+### 2. Store files that will be used by K8s components
+- You can use Persistent Volume
+- Persiste Volume requirements:
+	- It's like any other cluster resource
+	- Its created via YAML file 
+
+	```yaml
+    apiVersion: v1
+    kind: PersistentVolume # kind is PersistentVolume
+    metadata:
+      name: mypv
+    spec:
+      capacity:
+        storage: 5Gi #
+      volumeMode: Filesystem
+      accessModes:
+        - ReadWriteOnce
+      persistentVolumeReclaimPolicy: Recycle
+      storageClassName: slow
+      mountOptions:
+        - hard
+        - nfsvers=4.1
+      nfs:
+        path: /tmp
+        server: 172.17.0.2
+    ```
+    - It needs actual physical storage, like;
+    	- Local disk in a cluster node, 
+    	- External nfs server outside the cluster, or 
+    	- Cloud storage
+
+ 	- How to make the physical storage available to the cluster?
+ 		- It's done by Data Persistent in K8s. K8s doesn't care about the actual storage, It uses `PersistentVolume` as an interface to interact with actual/physical storage
+ 		- You have to specify the `type of storage` you need.
+ 		- You need to create and manage it by yourself
+	
+    > Note: Think of storage as an external plugin to your cluster 
+
+
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 
 	- e.g: `$ echo -n 'mongo123' | base64` //output bW9uZ28xMjM=

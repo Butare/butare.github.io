@@ -945,6 +945,7 @@ values.yaml containts Default values
 	- It's like any other cluster resource
 	- Its created via YAML file 
 
+	e.g: Local Persistent volume
 	```yaml
     apiVersion: v1
     kind: PersistentVolume # kind is PersistentVolume
@@ -962,9 +963,29 @@ values.yaml containts Default values
         - hard
         - nfsvers=4.1
       nfs:
-        path: /tmp
-        server: 172.17.0.2
+        path: /dir/path/on/nfs/server  # path in physical storage
+        server: nfs-server-ip-address 
     ```
+    
+    e.g of Google Cloud Persitent volume:
+        
+	```yaml
+    apiVersion: v1
+    kind: PersistentVolume # kind is PersistentVolume
+    metadata:
+      name: mypv
+      labels:
+      	failure-domain.beta.kubernetes.io/zone: us-central1-a__us-central1-b
+    spec:
+      capacity:
+        storage: 400Gi #
+      accessModes:
+        - ReadWriteOnce
+      gcePersistentDisk:
+        pdName: my-data-disk
+        fsType: ext4
+    ```
+    
     - It needs actual physical storage, like;
     	- Local disk in a cluster node, 
     	- External nfs server outside the cluster, or 
@@ -975,10 +996,45 @@ values.yaml containts Default values
  		- You have to specify the `type of storage` you need.
  		- You need to create and manage it by yourself
 	
-    > Note: Think of storage as an external plugin to your cluster 
+    Note: 
+    > - Think of storage as an external plugin to your cluster 
+    > - Persistent Volumes are NOT namespaced, which means they're accessible to the whole cluster
+    > 
+### Local vs. Remote Volume Types
+- Each volume type has it's own use case!
+- Local Volume types violates requirement for data persistence (DB)
+	- They're tied to 1 specific node
+	- They don't survive when a cluster crashes 
+  Therefore, for that reasons you should almost always never use Local Volume for DB persistence, use remote storage instead
+  
+### K8s Administrator and K8s User
+- Who creates the Persistent Volumes and when?
+	- Persistent Volumes (PV) are resources that need to be there BEFORE in a cluster so that a Pod that depends on it is created
 
+- Two roles in K8s cluster:
+  1. Administrator (e.g: DevOps or System admin)
+      - Sets up and maintains the cluster
+      - Create Storage resources maybe on Cloud, then Create Persistent Volume storage to link with storage resource 	 
+  2. User (e.g: Developer)
+      - deploys applications in cluster
+      - Explicitly configure the application to use the given Persistent Volumes (i.e; Application has to claim the Persistent Volume) by using a K8s component called `Persistent Volume Claim (PVC)` which is created with YAML configuration
+Example of Persistent Volume Claim:
+    
+    
+      ```yaml
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: mypvc
+      spec:
+        resources:
+          requests:
+            storage: 10Gi
+        volumeMode: Filesystem
+        accessModes:
+          - ReadWriteOnce
+      ```
 
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 
 	- e.g: `$ echo -n 'mongo123' | base64` //output bW9uZ28xMjM=
-        

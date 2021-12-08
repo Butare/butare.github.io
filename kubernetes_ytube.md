@@ -1025,7 +1025,7 @@ Example of Persistent Volume Claim:
       apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
-        name: mypvc
+        name: pvc-name
       spec:
         resources:
           requests:
@@ -1034,6 +1034,42 @@ Example of Persistent Volume Claim:
         accessModes:
           - ReadWriteOnce
       ```
+      - Then, Use the claimed PVC in Pods configuration
+
+      ```yaml
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: myapp
+        labels:
+          name: myapp
+      spec:
+        containers:
+        - name: myfrontend
+          image: nginx
+          volumeMounts:
+            - mountPath: "/var/www/html"
+              name: mypod
+        volumes:
+          - name: mypod
+            persistentVolumeClaim:
+              claimName: pvc-name # name of PVC component
+      ```
+      
+      ### Levels of Volume abstractions
+      
+      ```
+      1. Pod requests the volume through the PV claim, 
+      2. Claim tries to find volume in a cluster that meets the criteria (e.g; size), 
+      3. Volume has the actual storage backend on the disk
+      ```
+      Note: 
+      > The Claim (PVC) & the Pod that uses it, must be in the same Namespace
+      > 
+	### Why so many abstractions to use volume?
+    As a developer:
+    - You want to deploy an application on the cluster without caring where the data is being stored, can be either Cloud-storage or Local storage
+    - You don't want to set up the actual storages because it maybe bigger to store on your machine. you just have to claim the storage, then the cluster will handle the rest
 
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 

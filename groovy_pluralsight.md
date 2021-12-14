@@ -172,3 +172,10 @@ Demo:
 - A user has a logon and permissions into Jenkins
 - Credentials are used by Jenkins to access something outside jenkins.
 
+
+## Plug-ins
+
+- Actice Choices: https://plugins.jenkins.io/uno-choice/
+- Scriptler Plugin for Jenkins: https://plugins.jenkins.io/scriptler/
+Scriptler allows you to store/edit groovy scripts and execute it on any of the agents/nodes... no need to copy/paste groovy code anymore.
+

@@ -1062,6 +1062,11 @@ Example of Persistent Volume Claim:
       1. Pod requests the volume through the PV claim, 
       2. Claim tries to find volume in a cluster that meets the criteria (e.g; size), 
       3. Volume has the actual storage backend on the disk
+
+		When a volume is found:
+		- It will be mounted into the Pod (i.e; Pod.volumes.persistentVolumeClaim.claimName), then
+		- Volume is mounted into the Container (i.e; Pod.VolumeMounts),
+		 so that application container can read/write directly to the Storage
       ```
       Note: 
       > The Claim (PVC) & the Pod that uses it, must be in the same Namespace
@@ -1069,8 +1074,63 @@ Example of Persistent Volume Claim:
 	### Why so many abstractions to use volume?
     As a developer:
     - You want to deploy an application on the cluster without caring where the data is being stored, can be either Cloud-storage or Local storage
-    - You don't want to set up the actual storages because it maybe bigger to store on your machine. you just have to claim the storage, then the cluster will handle the rest
+    - You don't want to set up the actual storages because it maybe bigger to store on your machine. instead, you just have to claim the storage, then the cluster will handle the rest
+
+ #### ConfigMap and Secret
+ - The volumes for these two components are different from other components' volumes.
+ 	- 	Both of them are local volumes
+ 	- 	Are not created via PV and PVC, they're created and managed by Kubernetes
+
+- How to mount ConfigMap or Secret to your container:
+	- Create a ConfigMap and/or Secret component
+	- Mount that into your pod/container. i.e; `Pod.volumes.configMap.name`
+
+#### Summary
+- Volume is a directory with some data
+- These volumes are accessible in containers in a pod
+- The volume directory is made available, backed by which storage medium:
+	- defined by specific volume types
+	- Container accesses the mounted volume via: `Pod.containers.volumeMounts.mountPath` 
+
+- It's possible to configure multiple volume types in a Pod; just by listing them.
+
+
+#### Storage Class
+
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: storage-class-name
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: io1
+  iopsPerGB: "10"
+  fsType: ext4
+```
+
+- StorageBackend is defined in the Storage Class component via `provisioner` attribute
+- Each storage backend has own provisioner
+	- Internal provisioner: `kubernetes.io`
+	- There are external provisioners
+- Storage Class is another abstraction level
+	- abstracts underlying storage provider, and
+	- parameters for that storage 
+
+##### How Storage Class is used
+- Storage class is requested by PersistentVolumeClaim (PVC), `PersistentVolumeClaim.spec.storageClassName: [storage-class-name]`
+
+Now, when;
+- a Pod claims storage PVC
+- PVC requests storage from Storage Class (SC)
+- SC creates PV that meets the needs of the Claim
+
+
+# K8s StatefulSet explained
+
+
 
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 
 	- e.g: `$ echo -n 'mongo123' | base64` //output bW9uZ28xMjM=
+

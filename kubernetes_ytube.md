@@ -1128,7 +1128,15 @@ Now, when;
 
 # K8s StatefulSet explained
 
+## What is StatefulSet?
+- It's a K8s component that is used for stateful applications
+- What's stateful application?
+	- Is any application that persists data and it's state. e.g; all databases (mysql, alasticsearch, mongodb,...) 
 
+- Stateless applications (e.g: nodeJS):
+	- don't keep record of state
+	- each request or interaction is handled as a completely new request 
+	- e.g: nodejs application handles each request without depending on the previous data
 
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 

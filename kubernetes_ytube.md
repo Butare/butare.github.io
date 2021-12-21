@@ -1131,14 +1131,41 @@ Now, when;
 ## What is StatefulSet?
 - It's a K8s component that is used for stateful applications
 - What's stateful application?
-	- Is any application that persists data and it's state. e.g; all databases (mysql, alasticsearch, mongodb,...) 
+	- Is any application that persists data and it's state. e.g; all databases (mysql, alasticsearch, mongodb,...)
 
-- Stateless applications (e.g: nodeJS):
+- Stateless Applications (e.g: NodeJS):
 	- don't keep record of state
 	- each request or interaction is handled as a completely new request 
-	- e.g: nodejs application handles each request without depending on the previous data
+		- e.g: nodejs application handles each request without depending on the previous data
+
+	e.g:
+	- when update request is sent:
+		- `MongoDB (Stateful):` update data based on previous state
+		- `NodeJs (Stateless):` is a passthrough for data query/update  
+
+### Deployment of Stateless & Statefull applications
+Due to their differences both Stateless and Statefull applications are deployed differently.
+- Stateless applications are deployed using `Deployment` component
+- Statefull applications are deployed using `StatefulSet` component
+
+Both `Deployment` & `StatefulSet` manage Pods based on container specifications
+
+### Deployment vs. StatefulSet
+- Replicating stateful applications is more difficult, and has a couple of requirements that Stateless applications don't have
+
+e.g:
+- Suppose you have `MySQL` db that handles requests from `Java` app.
+	- Say, you want to replicate/scale Java application & Mysql DB into 3 applications in order to handle multiple requests.
+		- Since, Java application is stateless, the replication will be simple and straight forward because,
+			- The replicates are identical & interchangable  
+			- created in random order with random hashes
+			- one Service that load balances to any Pod
+
+		- Replicating MySQL application into 3 applications will be more difficult, because Replica Pods are not identical `Pod Identity`. Therefore;
+			- Pod can not be created/deleted at same time
+			- Cann't be randomly addressed
+
 
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 
 	- e.g: `$ echo -n 'mongo123' | base64` //output bW9uZ28xMjM=
-

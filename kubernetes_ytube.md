@@ -1161,11 +1161,35 @@ e.g:
 			- created in random order with random hashes
 			- one Service that load balances to any Pod
 
-		- Replicating MySQL application into 3 applications will be more difficult, because Replica Pods are not identical `Pod Identity`. Therefore;
+		- Replicating MySQL application into 3 applications will be more difficult, because Replica Pods are not identical by `Pod Identity` there are being created from. Therefore;
 			- Pod can not be created/deleted at same time
 			- Cann't be randomly addressed
 
+	- Pod Identity:
+		- Sticky identity for each pod
+		- Created from same application, but not interchangeable
+		- It is a persistent identifier across any rescheduling which means when a Pod dies, it is replaced by an other Pod with the same Identity
+
+	- Why Pod Identity is needed?
+		- This is related to Scaling database applications. Because when you replicate/scale database, data must be consistent
+		- Therefore, there must be one `Master` pod, that manages `Worker` pods to ensure the data consistency
+		- Master must always notify each `Worker` when there's an update.
+		- When a new Worker pod is added, it will copy data from previous pod and continue to synchronize
+
+	Scaling database applications:
+	- You need to use Persistent Volume (`PV`) because, PV lifecyle is not tied to other component's lifecycle
+		- The way to configure Persistent Volume is to use `Pod State`, and since each Pod has it's own data physical storage which includes replicated data, and Pod state which has Pod's information whether it's master pod or slave pod, ...
+		- So, when a Pod dies, the Persistent Pod Identifier make sure that Storage volume is re-attached to the replacement Pod
+
+		- It is important to use remote storage in order to persist data from one node to an other node
+		
+  #### Pod Identity
+  - a `Deployment` uses `random hash` e.g: `mysql-c838d4e2d3e4bk`
+  - a `StatefulSet` uses fixed ordered names format: `${statefulset name}-$(ordinal)`. eg: `mysql-0`
+		- e.g; MySQL StatefulSet with 3 replicas, will be: `mysql-0` ,`mysql-1`, `mysql-2`
+		- The first replica (i.e; `mysql-0` will be MASTER, others will be WORKERs
 
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 
 	- e.g: `$ echo -n 'mongo123' | base64` //output bW9uZ28xMjM=
+

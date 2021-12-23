@@ -1186,10 +1186,62 @@ e.g:
   #### Pod Identity
   - a `Deployment` uses `random hash` e.g: `mysql-c838d4e2d3e4bk`
   - a `StatefulSet` uses fixed ordered names format: `${statefulset name}-$(ordinal)`. eg: `mysql-0`
-		- e.g; MySQL StatefulSet with 3 replicas, will be: `mysql-0` ,`mysql-1`, `mysql-2`
-		- The first replica (i.e; `mysql-0` will be MASTER, others will be WORKERs
+	- e.g; MySQL StatefulSet with 3 replicas, will be: `mysql-0` ,`mysql-1`, `mysql-2`
+		- The first replica (i.e; `mysql-0` will be MASTER, others will be SLAVES/WORKERS
+		- For StatefulSet replicas, the next Pod is only created if previous is up and running
+		- Also the deletion is done in reverse order (Last-in First-out)
+
+	- StatefulSet Pod has 2 characteristics
+		- Predictable pod name. e.g; `mysql-0`
+		- Fixed individual DNS name e.g:`mysql-0.svc2`  
+
+	These 2 characteristics creates a Sticky identity! which means that when a Pod restarts:
+    - IP address changes, but
+    - name and endpoint stays the same
+	The Sticky Identity will retain the state and role of a Pod when it's recreated
+
+Note, Replicating stateful apps:
+- requires a complex mechanisms
+- Kubernetes helps you but you still need to do a lot, because Stateful applications are not perfect for containerized environment e.g;
+	- you need to configure the cloning and data synchronization
+	- Make remote storage available, manage it and back it up
+
+- Docker & container orchestration is perfect for Stateless applications
+
+# K8s Services explained
+## What is a Kubernetes Service and when we need it?
+
+- In K8s each `Pod` has its own IP address, but Pods are ephemeral (means are destroyed frequently), which means when a Pod is destroyed, and create a new Pod will have a new IP address, as a result Pod's IP address are not reliable
+- `Service` 
+	- has stable IP address, and provides a loadbalancing. Therefore, we use Service stable IP address to control the Pods in that service
+	- Services are good abstraction for loose coupling within & outside cluster
+
+## Explain different Service types, their differences, and when to use which one;
+### ClusterIP Services
+- Is a default & commonly used service. A Service will use this type if no type is specified in the config file
+
+#### How ClusterIP work
+- It's internal cluster, so it should define rules (IP & Port) that will allow external service (e.g Ingress) to access the Internal cluster
+
+```yaml
+Browser -> Ingress -> ClusterIP --> Pod1, Pod2, ..
+```
+How a Service knows which Pod to forward the request to?
+- Pods are identified via `Selectors` (i.e; `Service.spec.selector.app: [pod-name]`
+- Key value pair
+- Labels of Pods
+
+
+
+### NodePort Services
+
+### Headless Services
+
+### LoadBalancer Services 
+
+
+
 
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 
 	- e.g: `$ echo -n 'mongo123' | base64` //output bW9uZ28xMjM=
-

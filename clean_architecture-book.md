@@ -682,4 +682,23 @@ Business Rules <--- uses ---- GUI
 
 
 ## PLUGIN ARCHITECTURE
+- The software development technology can be seen as how to conveniently create plugins to establish a scalable and maintainable system architecture.
+- The core business rules are kept separate from, and independent of, those components that are either optional or that can be implemented in many different forms
 
+```yaml
+GUI -- uses --> Business rules <-- uses -- DB
+```
+- Because the GUI is a plugin, it's possible to plugi many different kinds of user interface UI. such as Web based, client/server based, SOA based, Console based, ...
+- The same is true of the DB. we can replace it with SQL database, or a NOSQL database, file system-base DB, ...
+
+
+## CONLUSION
+- To draw boundary lines in a software architecture, you first partition the system into components.
+- Some of those components are core business rules, others are plugins that contain necessary functions that are not directly related to the core business.
+- The arrange the code in those components such that the arrows between them point in one direction -- toward the core business
+
+- You should recognize this as an application of the Dependency Inversion Principle (DIP) and the Stable Abstraction Principle(SAP).
+- The Dependency arrows arranged to point from lower-level details to higher-level abstractions
+
+
+# 18. BOUNDARY ANATOMY

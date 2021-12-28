@@ -1226,22 +1226,187 @@ Note, Replicating stateful apps:
 ```yaml
 Browser -> Ingress -> ClusterIP --> Pod1, Pod2, ..
 ```
-How a Service knows which Pod to forward the request to?
-- Pods are identified via `Selectors` (i.e; `Service.spec.selector.app: [pod-name]`
-- Key value pair
-- Labels of Pods
+How a Service knows which `Pod` to forward the request to?
+- Pods are identified via `Selectors` attribute (i.e; `Service.spec.selector.app: [pod-name]`
+- Key-value pairs, which are labels that a Pod has (i.e; `Deployment.spec.template.metadata.labels.app: [pod-name]`)
 
+How a Service knows which Pod's `port` to forward the request to?
+Since a Pod may have multiple ports open, a service needs to know the port number.
+`Service.spec.ports.targetPort: [port-number]` port-number, is pod's port number
 
+Note:
+- Service Port is arbitrary
+- `Service.targetPort` must match the port the container is listening at
+- Pods' ports can be similar, since a service is a loadbalancer can randomly select which one to redirect to.
+
+#### Service Communication Example
+```yaml
+Browser --> Ingress (external-service) 10.128.8.64:3200 --> Internal Service (ClusterIP) 
+    --> Pod Node1 10.2.2.5:3000
+    			           --> connect to DB 
+    --> Pod Node2  10.2.1.4:3000
+```
+Say, DB has an internal service, and 2 replicas;
+```yaml
+Internal Service(ClusterIP) 10.128.19.160:27017
+    	--> Pod Node3 10.2.1.5:27017 
+        --> Pod Node1 10.2.3.3:27017
+```
+So, from the above configurations, the flow would be;
+```yaml
+Browser --> Ingress's Internal Service (at 10.128.8.64:3200) --> Pod Node2 (at 10.2.1.4:3000) --> DB's Internal Service (at 10.128.19.160:27017) --> Pod Node1 (at 10.2.3.3:27017)
+```
+snippets for DB service
+	
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  ...
+spec:
+  selector:
+      app: mongodb
+  ports:
+    - name: mongodb
+      protocol: TCP
+      port: 27017  # db's internal service port
+      targetPort: 27017 # target pod's port
+
+```
+
+### Multiple-Port services
+- An internal service can have multiple ports which also manages containers that have multiple ports
+
+```yaml
+Service(ClusterIP) 10.128.19.160:27017 and 9216
+    	--> Pod node1 
+            --> (mongo-db app) 10.2.1.5:27017
+            --> (mongo-db exporter) 10.2.1.5:9216
+        --> Pod node3 
+            --> (mongo-db app) 10.2.3.3:27017
+            --> (mongo-db exporter) 10.2.3.3:9216
+       
+```
+- From the above example notice, a service has 2 ports which means it can receive 2 requests for different apps 
+
+snippets for DB service
+	
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  ...
+spec:
+  selector:
+      app: mongodb
+  ports:
+    - name: mongodb # pod's name
+      protocol: TCP
+      port: 27017  # db's internal service port
+      targetPort: 27017 # target pod's port
+
+	- name: mongodb-exporter # pod's name
+      protocol: TCP
+      port: 9216  # mongodb-exporter's internal service port
+      targetPort: 9216 # actual pod's port for mongodb-exporter
+```
+Note; if you have multiple pods you have to name them and use their names in a Service.
 
 ### NodePort Services
 
 ### Headless Services
+- Imagine a Client wants to communicate with 1 specific Pod directly, or
+- Pods want to talk directly with specific Pod, not randomly selected
 
-### LoadBalancer Services 
+Use case: This is useful when you want to access the `Stateful applications`, like Databases because in such application each may have it's own replica
 
+In this case, a Client needs to figure out IP addresses of each Pod,
+#### Option 1: API call to K8s API server
+	- This makes app too tied to K8s API, which is inefficient.
 
+#### Option 2: DNS Lookup
+- When a client a DNS lookup for a Service, DNS server will return a single IP address (Cluster IP)
+- However, If you set ClusterIP to "None" (`Service.spec.ClusterIP: None`) - DNS lookup will return Pod's IP address instead. Therefore, a client can directly connect to that specific pod
+
+Config snippets:
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  ...
+spec:
+  clusterIP: None # allows DNS lookup to return Pod's Id instead of a Service
+  selector:
+      app: mongodb
+  ports:
+    - name: mongodb
+      protocol: TCP
+      port: 27017  # db's internal service port
+      targetPort: 27017 # target pod's port
+```
+
+#### 3 Service type attributes
+1.  ClusterIP -- default
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+  ...
+spec:
+  type: ClusterIP # default (you can ignore this attribute)
+```
+  This type is default, not needed to specify
+  It's an internal service. ie, it is only accessible within a cluster
+
+2. NodePort
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+  ...
+spec:
+  type: NodePort
+  ports:
+   - protocol: TCP
+     port: 3200
+     targetPort: 3000
+     nodePort: 30008 # fixed port for this service
+```
+- This service, allows external traffic to have `access to fixed port` on each Woker Node
+- Note that the port range is: `30000 - 32767`
+- NodePort services are not secure!
+
+3. LoadBalancer (recommended)
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+  ...
+spec:
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 3200
+      targetPort: 3000
+      nodePort: 30010  # port of a node
+```
+- It's externally accessible but only through LoadBalancer (provided by any cloud service providers, google, AWS, Microsoft...)
+- A LoadBalancer service, becomes accessible externally through `cloud providers LoadBalancer`
+- `LoadBalancer Service` is an extension of `NodePort Service`,
+- `NodePort Service` is an extension of `ClusterIP Service`.
+
+ check service: `$ kubectl get svc`
+ 
+In real K8s application, don't use NodePort Service for external connection, but you can use it for testing some services quickly
 
 
 ## Others
 - Generate base64 in terminal: `echo -n 'text' | base64` 
 	- e.g: `$ echo -n 'mongo123' | base64` //output bW9uZ28xMjM=
+

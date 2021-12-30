@@ -1413,4 +1413,5 @@ In real K8s application, don't use NodePort Service for external connection, but
 
 ## Useful links:
 - https://www.linode.com/docs/guides/kubernetes/
+- https://www.linode.com/docs/guides/deploy-container-image-to-kubernetes/
 

@@ -1410,3 +1410,7 @@ In real K8s application, don't use NodePort Service for external connection, but
 - Generate base64 in terminal: `echo -n 'text' | base64` 
 	- e.g: `$ echo -n 'mongo123' | base64` //output bW9uZ28xMjM=
 
+
+## Useful links:
+- https://www.linode.com/docs/guides/kubernetes/
+

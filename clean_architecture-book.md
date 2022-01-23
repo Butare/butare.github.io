@@ -478,8 +478,8 @@ Stability Dependency Principle(SDP) violation
 
 Some software in the system should not change very often. This software represents high-level architecture and policy decisions.
 we don't want these business and architectural decisions to be volatile. 
-- The software that encapsulates the high-level policies of the system should be placed into stable components (I=0). Unstable components (I=1) should contain only the softare that is volatile -- softare that we want to be able to quickly and easily change.
-- However, if the high-level policies are placed into stable components, then the source code that represents those policies will be difficult to change. This could make the overall achitecture inflexible.
+- The software that encapsulates the high-level policies of the system should be placed into stable components (I=0). Unstable components (I=1) should contain only the software that is volatile -- software that we want to be able to quickly and easily change.
+- However, if the high-level policies are placed into stable components, then the source code that represents those policies will be difficult to change. This could make the overall architecture inflexible.
 - How can a component that is maximally stable (I=0) be flexible enough to withstand change?
 > The answer is found in OCP (Open-Closed Principle)
 - This principle tells us that it is possible and desirable to create classes that are flexible enough to be extended without requiring modification. 

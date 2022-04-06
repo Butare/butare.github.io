@@ -478,8 +478,8 @@ Stability Dependency Principle(SDP) violation
 
 Some software in the system should not change very often. This software represents high-level architecture and policy decisions.
 we don't want these business and architectural decisions to be volatile. 
-- The software that encapsulates the high-level policies of the system should be placed into stable components (I=0). Unstable components (I=1) should contain only the software that is volatile -- software that we want to be able to quickly and easily change.
-- However, if the high-level policies are placed into stable components, then the source code that represents those policies will be difficult to change. This could make the overall architecture inflexible.
+- The software that encapsulates the high-level policies of the system should be placed into stable components (I=0). Unstable components (I=1) should contain only the softare that is volatile -- softare that we want to be able to quickly and easily change.
+- However, if the high-level policies are placed into stable components, then the source code that represents those policies will be difficult to change. This could make the overall achitecture inflexible.
 - How can a component that is maximally stable (I=0) be flexible enough to withstand change?
 > The answer is found in OCP (Open-Closed Principle)
 - This principle tells us that it is possible and desirable to create classes that are flexible enough to be extended without requiring modification. 
@@ -702,3 +702,44 @@ GUI -- uses --> Business rules <-- uses -- DB
 
 
 # 18. BOUNDARY ANATOMY
+- The architecture of a system is defined by a set of software components and the boundaries that separate them.
+
+## BOUNDARY CROSSING
+- At runtime, a boundary crossing is nothing more than a function on one side of the boundary calling a function on the side and passing along some data. 
+- The trick to creating an appropriate boundary crossing is to manage the source code dependencies
+- Why source code?
+	- Because when one source module changes, other source code modules have to be changed or recompiled, and the redeployed. Managing and building firewalls against this change is what boundaries are all about
+
+
+## THE DREADED MONOLITH
+- The simplest and most common of the architectural boundaries has no strict physical representation.
+- From a deployment point of view, it's a single executable file -- the so-called `monolith`. e.g; jar for Java, .exe for .Net,...
+- The simplest possible boundary crossing is a function call from a low-level client to a higher-level service. Both the runtime and the compile-time dependency point in the same direction, toward the higher-level component
+
+
+
+## THREADS
+- Both monoliths and deployment components can make use of threads. Threads are not architectural boundaries or units of deployment, but rather a way to organize the schedule and order of execution.
+
+
+
+
+## SERVICES
+- The strongest boundary is a service. A service is a process, generally started from the command line or through an equivalent system call. 
+- Services don't depend on their physical location. 
+- The services assume that ll communications take place over the network
+- Care must be taken to avoid chatting where possible.
+
+## CONCLUSION
+- Most systems, other than monoliths use more than one boundary strategy
+
+
+# 19. POLICY AND LEVEL
+- Software systems are statements of policy. Indeed, at its core, that's all a computer program actually is.
+- A computer program is a detailed description of the policy by which inputs are transformed into outputs
+- Policies that achange for the same reasons, and at the same times, are at the same level and belong together in the same component
+- Policies that change for different reasons, or at different times, are at different levels and should be separated into different components
+
+
+## LEVEL
+
